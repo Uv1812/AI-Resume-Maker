@@ -1,0 +1,21 @@
+# Environment
+.env
+*.env
+
+# Generated resumes (don't commit user data)
+generated_resumes/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# Playwright
+.playwright/
+
+# OS
+.DS_Store
+Thumbs.db

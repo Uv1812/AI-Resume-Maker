@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ResumeForge – AI Resume Builder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Serif+Display&family=Playfair+Display:wght@600;700&family=Cormorant+Garamond:wght@400;600&family=Instrument+Sans:wght@300;400;500;600&family=DM+Sans:wght@300;400;500;600&family=Source+Sans+3:wght@400;600&family=Lato:wght@400;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/style.css"/>
+</head>
+<body data-theme="midnight" data-font="syne">
+
+<canvas id="bgCanvas"></canvas>
+<div class="noise-overlay"></div>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="nav-brand">
+    <span class="brand-logo">Resume<em>Forge</em></span>
+    <span class="brand-badge">AI</span>
+  </div>
+  <div class="nav-steps">
+    <div class="nav-step active" data-step="1" onclick="goStep(1)"><span class="step-icon">👤</span><span class="step-lbl">Basics</span></div>
+    <div class="step-connector"></div>
+    <div class="nav-step" data-step="2" onclick="goStep(2)"><span class="step-icon">🎓</span><span class="step-lbl">Education</span></div>
+    <div class="step-connector"></div>
+    <div class="nav-step" data-step="3" onclick="goStep(3)"><span class="step-icon">💼</span><span class="step-lbl">Experience</span></div>
+    <div class="step-connector"></div>
+    <div class="nav-step" data-step="4" onclick="goStep(4)"><span class="step-icon">⚡</span><span class="step-lbl">Skills</span></div>
+    <div class="step-connector"></div>
+    <div class="nav-step" data-step="5" onclick="goStep(5)"><span class="step-icon">🚀</span><span class="step-lbl">Projects</span></div>
+    <div class="step-connector"></div>
+    <div class="nav-step" data-step="6" onclick="goStep(6)"><span class="step-icon">✨</span><span class="step-lbl">Generate</span></div>
+  </div>
+  <button class="btn-settings" onclick="toggleSettings()">⚙ Settings</button>
+</nav>
+
+<!-- Settings Drawer -->
+<div class="settings-drawer hidden" id="settingsDrawer">
+  <div class="settings-inner">
+    <div class="settings-group">
+      <div class="settings-label">Theme</div>
+      <div class="theme-btns">
+        <button class="theme-btn active" data-theme="midnight" onclick="setTheme('midnight')">🌑 Midnight</button>
+        <button class="theme-btn" data-theme="slate" onclick="setTheme('slate')">🌤 Slate</button>
+        <button class="theme-btn" data-theme="forest" onclick="setTheme('forest')">🌲 Forest</button>
+        <button class="theme-btn" data-theme="amber" onclick="setTheme('amber')">🔥 Amber</button>
+      </div>
+    </div>
+    <div class="settings-group">
+      <div class="settings-label">Font Style</div>
+      <div class="theme-btns">
+        <button class="font-btn active" data-font="syne" onclick="setFont('syne')">Syne Modern</button>
+        <button class="font-btn" data-font="editorial" onclick="setFont('editorial')">Editorial</button>
+        <button class="font-btn" data-font="elegant" onclick="setFont('elegant')">Elegant</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TEMPLATE PICKER MODAL ══ -->
+<div class="tpl-overlay hidden" id="tplOverlay" onclick="closeTplModal(event)">
+  <div class="tpl-modal">
+    <div class="tpl-modal-hd">
+      <div>
+        <div class="tpl-modal-badge">✦ Choose Your Style</div>
+        <h2 class="tpl-modal-title">Resume <em>Templates</em></h2>
+        <p class="tpl-modal-sub">Select a template — preview updates instantly.</p>
+      </div>
+      <button class="tpl-close" onclick="closeTplModal()">✕</button>
+    </div>
+    <div class="tpl-grid" id="tplGrid"></div>
+    <div class="tpl-actions">
+      <button class="btn-prev" onclick="closeTplModal()">Cancel</button>
+      <button class="btn-next" onclick="applyTemplate()">Apply &amp; Preview <span>→</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FULL PREVIEW MODAL ══ -->
+<div class="preview-overlay hidden" id="previewOverlay" onclick="closePreviewModal(event)">
+  <div class="preview-modal">
+    <div class="preview-modal-hd">
+      <span id="previewModalLabel">Template Preview</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn-ai small" onclick="applyFromPreview()">✦ Apply This Template</button>
+        <button class="tpl-close" onclick="closePreviewModal()">✕</button>
+      </div>
+    </div>
+    <!-- Scaler wrap — mirrors main preview exactly -->
+    <div class="preview-modal-frame-wrap">
+      <div class="preview-modal-scale-container" id="previewModalScaleContainer">
+        <iframe id="previewModalFrame" class="preview-modal-frame"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main -->
+<main class="main-wrap">
+  <header class="hero-header">
+    <div class="hero-tag">✦ AI-Powered</div>
+    <h1 class="hero-title">Build a Resume that<br/><em>Gets You Hired</em></h1>
+    <p class="hero-sub">Transform your experience into a polished resume, cover letter, portfolio bio &amp; LinkedIn summary — powered by Groq AI.</p>
+    <div class="dot-nav" id="dotNav">
+      <span class="dot active" data-step="1" onclick="goStep(1)"></span>
+      <span class="dot" data-step="2" onclick="goStep(2)"></span>
+      <span class="dot" data-step="3" onclick="goStep(3)"></span>
+      <span class="dot" data-step="4" onclick="goStep(4)"></span>
+      <span class="dot" data-step="5" onclick="goStep(5)"></span>
+      <span class="dot" data-step="6" onclick="goStep(6)"></span>
+    </div>
+  </header>
+
+  <!-- STEP 1 -->
+  <section class="step-panel active" id="step1">
+    <div class="panel-chrome">
+      <div class="panel-head">
+        <div class="panel-badge">01 · Personal Info</div>
+        <h2 class="panel-title">Let's start with <em>you</em></h2>
+        <p class="panel-desc">Your contact details and objective.</p>
+      </div>
+      <div class="form-grid g2">
+        <div class="field req" data-field="name"><label>Full Name <span class="req-star">*</span></label>
+          <input id="name" type="text" placeholder="e.g. Arjun Mehta" oninput="clearErr('name')"/>
+          <div class="field-err">Full name is required</div></div>
+        <div class="field req" data-field="target_role"><label>Target Role <span class="req-star">*</span></label>
+          <input id="target_role" type="text" placeholder="e.g. Software Engineer Intern" oninput="clearErr('target_role')"/>
+          <div class="field-err">Target role is required</div></div>
+        <div class="field req" data-field="email"><label>Email <span class="req-star">*</span></label>
+          <input id="email" type="email" placeholder="arjun@college.edu" oninput="clearErr('email')"/>
+          <div class="field-err">Valid email is required</div></div>
+        <div class="field"><label>Phone</label><input id="phone" type="text" placeholder="+91 98765 43210"/></div>
+        <div class="field"><label>Location</label><input id="location" type="text" placeholder="Mumbai, India"/></div>
+        <div class="field"><label>Years of Experience</label><input id="experience_years" type="number" placeholder="0" min="0" max="50"/></div>
+        <div class="field">
+          <label>LinkedIn Username</label>
+          <input id="linkedinUser" type="text" placeholder="arjunmehta (without linkedin.com/in/)" />
+          <small style="color:#888;font-size:11px;"></small>
+        </div>
+        <div class="field"><label>LinkedIn</label><input id="linkedin" type="text" placeholder="https://www.linkedin.com/in/arjunmehta"/></div>
+        <div class="field"><label>GitHub / Portfolio</label><input id="github" type="text" placeholder="github.com/arjunmehta"/></div>
+        <div class="field full">
+          <div class="ai-card">
+            <div class="ai-card-head"><span class="ai-star">✦</span> Objective — AI Enhanced</div>
+            <textarea id="summary" rows="4" placeholder="Write your own or click Generate below…"></textarea>
+            <button class="btn-ai" id="btnGenSummary" onclick="generateSummary()">
+              <span class="spin hidden" id="spnSummary">◌</span>✦ Generate with AI</button>
+          </div></div>
+      </div>
+    </div>
+    <div class="step-nav"><div></div><button class="btn-next" onclick="nextStep(1,2)">Education <span>→</span></button></div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="step-panel" id="step2">
+    <div class="panel-chrome">
+      <div class="panel-head"><div class="panel-badge">02 · Education</div>
+        <h2 class="panel-title">Your <em>Education</em></h2>
+        <p class="panel-desc">Degrees, institutions, GPA, and achievements.</p></div>
+      <div id="educationList"></div>
+      <button class="btn-add" onclick="addEducation()">＋ Add Degree</button>
+      <div class="divider-label">Certifications</div>
+      <div id="certList"></div>
+      <button class="btn-add" onclick="addCert()">＋ Add Certification</button>
+    </div>
+    <div class="step-nav">
+      <button class="btn-prev" onclick="goStep(1)">← Basics</button>
+      <button class="btn-next" onclick="nextStep(2,3)">Experience <span>→</span></button>
+    </div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section class="step-panel" id="step3">
+    <div class="panel-chrome">
+      <div class="panel-head"><div class="panel-badge">03 · Experience</div>
+        <h2 class="panel-title">Work <em>Experience</em></h2>
+        <p class="panel-desc">Internships, part-time, full-time, research, freelance — AI polishes your bullets.</p></div>
+      <div id="experienceList"></div>
+      <button class="btn-add" onclick="addExperience()">＋ Add Position</button>
+    </div>
+    <div class="step-nav">
+      <button class="btn-prev" onclick="goStep(2)">← Education</button>
+      <button class="btn-next" onclick="nextStep(3,4)">Skills <span>→</span></button>
+    </div>
+  </section>
+
+  <!-- STEP 4 -->
+  <section class="step-panel" id="step4">
+    <div class="panel-chrome">
+      <div class="panel-head"><div class="panel-badge">04 · Skills</div>
+        <h2 class="panel-title">Your <em>Skills</em></h2>
+        <p class="panel-desc">Add skills manually or let AI suggest based on your role.</p></div>
+      <div class="skills-row">
+        <input type="text" id="skillInput" placeholder="Type a skill and press Enter…" onkeydown="handleSkillKey(event)"/>
+        <button class="btn-ai small" onclick="suggestSkills()">
+          <span class="spin hidden" id="spnSkills">◌</span>✦ AI Suggest</button>
+      </div>
+      <div class="skills-cloud" id="skillsCloud"><span class="cloud-hint">Your skills will appear here…</span></div>
+    </div>
+    <div class="step-nav">
+      <button class="btn-prev" onclick="goStep(3)">← Experience</button>
+      <button class="btn-next" onclick="nextStep(4,5)">Projects <span>→</span></button>
+    </div>
+  </section>
+
+  <!-- STEP 5 -->
+  <section class="step-panel" id="step5">
+    <div class="panel-chrome">
+      <div class="panel-head"><div class="panel-badge">05 · Projects</div>
+        <h2 class="panel-title">Your <em>Projects</em></h2>
+        <p class="panel-desc">Showcase what you've built — impact matters.</p></div>
+      <div id="projectList"></div>
+      <button class="btn-add" onclick="addProject()">＋ Add Project</button>
+      <div class="ats-panel">
+        <div class="ats-panel-head"><span class="ai-star">✦</span>
+          <div><div class="ats-title">ATS Score Checker</div>
+          <div class="ats-subtitle">Paste a job description to see keyword alignment.</div></div>
+        </div>
+        <textarea id="jobDesc" rows="5" placeholder="Paste the full job description here…"></textarea>
+        <button class="btn-ai" onclick="checkATS()">
+          <span class="spin hidden" id="spnATS">◌</span>✦ Analyze ATS Score</button>
+        <div id="atsResult" class="hidden"></div>
+      </div>
+    </div>
+    <div class="step-nav">
+      <button class="btn-prev" onclick="goStep(4)">← Skills</button>
+      <button class="btn-next" onclick="nextStep(5,6)">Generate <span>→</span></button>
+    </div>
+  </section>
+
+  <!-- STEP 6 -->
+  <section class="step-panel" id="step6">
+    <div class="panel-chrome">
+      <div class="panel-head"><div class="panel-badge">06 · Generate</div>
+        <h2 class="panel-title">AI <em>Generation</em></h2>
+        <p class="panel-desc">Let Groq AI craft your perfect career documents — preview renders instantly.</p></div>
+
+      <!-- Customize row -->
+      <div class="gen-customize">
+        <div class="form-grid g2">
+          <div class="field"><label>Override Target Role <small>(optional)</small></label>
+            <input id="gen_role" type="text" placeholder="Software Engineer Intern"/></div>
+          <div class="field"><label>Target Company <small>(optional)</small></label>
+            <input id="gen_company" type="text" placeholder="Google, Stripe, Amazon…"/></div>
+        </div>
+      </div>
+
+      <!-- Doc Type cards -->
+      <div class="doc-grid">
+        <div class="doc-card active" data-doc="resume" onclick="setActiveDoc('resume')">
+          <div class="doc-icon">📄</div><div class="doc-name">Resume</div>
+          <div class="doc-desc">ATS-optimized professional resume</div></div>
+        <div class="doc-card" data-doc="coverLetter" onclick="setActiveDoc('coverLetter')">
+          <div class="doc-icon">✉️</div><div class="doc-name">Cover Letter</div>
+          <div class="doc-desc">Personalized cover letter</div></div>
+        <div class="doc-card" data-doc="portfolio" onclick="setActiveDoc('portfolio')">
+          <div class="doc-icon">🎨</div><div class="doc-name">Portfolio Bio</div>
+          <div class="doc-desc">About section for your website</div></div>
+        <div class="doc-card" data-doc="linkedin" onclick="setActiveDoc('linkedin')">
+          <div class="doc-icon">💼</div><div class="doc-name">LinkedIn</div>
+          <div class="doc-desc">Optimized LinkedIn summary</div></div>
+      </div>
+
+      <div class="gen-actions">
+        <button class="btn-gen-primary" id="btnGenActive" onclick="generateActive()">
+          <span class="spin hidden" id="spnGenActive">◌</span>
+          <span id="genActiveLbl">✨ Generate Resume</span>
+        </button>
+        <button class="btn-gen-all" id="btnGenAll" onclick="generateAll()">
+          <span class="spin hidden" id="spnGenAll">◌</span>Generate All Docs
+        </button>
+      </div>
+      <div class="gen-error hidden" id="genError"></div>
+
+      <!-- Text outputs (cover letter / portfolio / linkedin only) -->
+      <div id="generatedOutputs"></div>
+
+      <!-- Visual Resume Preview — always visible after first generate -->
+      <div class="preview-section hidden" id="previewSection">
+        <div class="preview-toolbar">
+          <div class="tpl-active-badge">
+            <span class="tpl-badge-dot"></span>
+            <span id="activeTplName">Executive Purple</span>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <button class="btn-template-pick" onclick="openTplModal()">🎨 Choose Template</button>
+            <button class="btn-download hidden" id="btnDownload" onclick="downloadResumePDF()">⬇ Download PDF</button>
+            <button class="btn-download-html hidden" id="btnDownloadHtml" onclick="downloadResumeHTML()" style="font-family:var(--ff-body);font-size:12px;font-weight:700;padding:8px 18px;border-radius:8px;cursor:pointer;background:var(--surface2);color:var(--text2);border:1px solid var(--border);transition:all .2s;">⬇ HTML</button>
+          </div>
+        </div>
+        <div class="preview-loading hidden" id="previewLoading">
+          <div class="loading-spinner"></div>
+          <span>Rendering your resume…</span>
+        </div>
+        <div class="preview-frame-wrap">
+          <div class="preview-scale-container" id="previewScaleContainer">
+            <iframe id="previewFrame" class="preview-frame"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="step-nav">
+      <button class="btn-prev" onclick="goStep(5)">← Projects</button>
+      <div></div>
+    </div>
+  </section>
+</main>
+
+<div class="toast hidden" id="toast"></div>
+
+<div class="modal-overlay hidden" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-icon">⚠️</div>
+    <div class="modal-title">Required Fields Missing</div>
+    <div class="modal-body" id="modalBody"></div>
+    <button class="btn-next" onclick="closeModal()" style="width:100%;justify-content:center">Got it</button>
+  </div>
+</div>
+
+<script src="/static/script.js"></script>
+</body>
+</html>
