@@ -1728,13 +1728,9 @@ def template_cyber(data: dict) -> str:
 
 # ─── TEMPLATE 11: Classic ────────────────────────────
 def template_classic(data: dict) -> str:
-    contact_parts = []
-    if data.get('location'): contact_parts.append(f'📍 {data["location"]}')
-    if data.get('phone'):    contact_parts.append(f'📞 {data["phone"]}')
-    if data.get('email'):    contact_parts.append(f'✉ {data["email"]}')
-    if data.get('linkedin'): contact_parts.append(f'<a href="{data["linkedin"]}" target="_blank">LinkedIn</a>')
-    if data.get('github'):   contact_parts.append(f'<a href="{data["github"]}" target="_blank">GitHub</a>')
-    contact = ' &nbsp;·&nbsp; '.join(contact_parts)
+    contact_parts = _build_contact_parts(data)
+    contact = ' '.join(f'<span class="ct">{p}</span>' for p in contact_parts)
+
     exp_html = ''
     for job in data.get('experience', []):
         bullets = ''.join(f'<li>{b}</li>' for b in job.get('bullets', []) if b.strip())
