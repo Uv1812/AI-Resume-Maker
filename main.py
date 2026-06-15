@@ -2681,44 +2681,16 @@ def download_pdf(filename):
         return jsonify({"error": "HTML file not found"}), 404
 
     try:
-        from playwright.sync_api import sync_playwright
-        
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
-            
-            # Load the HTML file
-            page.goto(f'file:///{os.path.abspath(html_path)}', 
-                      wait_until='networkidle', 
-                      timeout=30000)
-            
-            # Wait for fonts and CSS to load
-            page.wait_for_timeout(1200)
-            
-            # Generate clean PDF
-            page.pdf(
-                path=pdf_path,
-                format='A4',
-                print_background=True,
-                margin={'top': '0mm', 'right': '0mm', 'bottom': '0mm', 'left': '0mm'}
-            )
-            browser.close()
-
-        # Check if PDF was created properly
-        if os.path.exists(pdf_path) and os.path.getsize(pdf_path) > 10000:
-            return send_file(
-                pdf_path,
-                as_attachment=True,
-                download_name=filename,
-                mimetype='application/pdf'
-            )
-        else:
-            return jsonify({"error": "PDF generation failed - file too small"}), 500
-
-    except ImportError:
-        return jsonify({"error": "Playwright not installed. Run:\npip install playwright\nplaywright install chromium"}), 500
+        from weasyprint import HTML, CSS
+        HTML(filename=os.path.abspath(html_path)).write_pdf(pdf_path)
+        return send_file(
+            pdf_path,
+            as_attachment=True,
+            download_name=filename,
+            mimetype='application/pdf'
+        )
     except Exception as e:
-        print("PDF Generation Error:", str(e))
+        print("PDF Error:", str(e))
         return jsonify({"error": f"PDF generation failed: {str(e)}"}), 500
        
 os.makedirs("generated_resumes", exist_ok=True)
