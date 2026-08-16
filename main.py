@@ -173,7 +173,7 @@ Key achievements: {data.get('achievements', 'Not provided')}
 Write ONLY the 2-3 lines objective , no labels or extra text.
 """
     response = client.chat.completions.create(
-        model="llama-3.1-8b-instant",
+        model="openai/gpt-oss-20b",  # migrated from deprecated llama-3.1-8b-instant
         messages=[{"role": "user", "content": prompt}],
         max_tokens=200, temperature=0.7,
     )
@@ -189,7 +189,7 @@ Original: {raw_bullet}
 Return ONLY the improved bullet point starting with a strong action verb. No extra text.
 """
     response = client.chat.completions.create(
-        model="llama-3.1-8b-instant",
+        model="openai/gpt-oss-20b",  # migrated from deprecated llama-3.1-8b-instant
         messages=[{"role": "user", "content": prompt}],
         max_tokens=100, temperature=0.6,
     )
@@ -204,7 +204,7 @@ Existing skills: {', '.join(existing_skills)}
 Return ONLY a JSON array of skill strings, nothing else. Example: ["Skill1", "Skill2"]
 """
     response = client.chat.completions.create(
-        model="llama-3.1-8b-instant",
+        model="openai/gpt-oss-20b",  # migrated from deprecated llama-3.1-8b-instant
         messages=[{"role": "user", "content": prompt}],
         max_tokens=150, temperature=0.5,
     )
@@ -264,7 +264,7 @@ Return ONLY this JSON, no markdown, no extra text:
 
     try:
         response = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
+            model="openai/gpt-oss-20b",  # migrated from deprecated llama-3.1-8b-instant
             messages=[{"role": "user", "content": prompt}],
             max_tokens=600,
             temperature=0.1,
@@ -2602,7 +2602,7 @@ def generate_doc():
     data     = payload.get("data", {})
     role     = payload.get("role", data.get("target_role", ""))
     company  = payload.get("company", "")
-    model    = payload.get("model", "llama-3.3-70b-versatile")
+    model    = payload.get("model", "openai/gpt-oss-120b")  # migrated from deprecated llama-3.3-70b-versatile
 
     student_info = f"""
 STUDENT PROFILE:
