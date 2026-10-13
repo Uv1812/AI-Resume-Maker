@@ -3,7 +3,7 @@ let currentStep    = 1;
 let skills         = [];
 let lastFilename   = null;
 let activeDocType  = 'resume';
-let selectedModel  = 'llama-3.3-70b-versatile';
+let selectedModel  = 'openai/gpt-oss-120b';
 let activeTemplate = 'executive';
 let pendingTemplate= 'executive';
 
